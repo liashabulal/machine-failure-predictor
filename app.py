@@ -5,14 +5,15 @@ import joblib
 import shap
 import matplotlib.pyplot as plt
 
-# ── Load model ──────────────────────────────
+# ── Load model and scaler ────────────────────
 model = joblib.load('model.pkl')
+scaler = joblib.load('scaler.pkl')
 
-# ── Page config ─────────────────────────────
+# ── Page config ──────────────────────────────
 st.title("🔧 Machine Failure Predictor")
 st.write("Enter sensor readings below to predict if a machine will fail.")
 
-# ── Sidebar inputs ───────────────────────────
+# ── Sidebar inputs ────────────────────────────
 st.sidebar.header("Sensor Readings")
 
 air_temp = st.sidebar.slider(
@@ -56,10 +57,19 @@ machine_type = st.sidebar.selectbox(
     format_func=lambda x: ["Low (L)", "Medium (M)", "High (H)"][x]
 )
 
-# ── Predict button ───────────────────────────
+# ── Predict button ────────────────────────────
 if st.button("Predict"):
 
-    # Build input dataframe
+    # ── Scale numeric features the same way as training ──
+    numeric_cols = [
+        'Air temperature [K]',
+        'Process temperature [K]',
+        'Rotational speed [rpm]',
+        'Torque [Nm]',
+        'Tool wear [min]'
+    ]
+
+    # Raw input dataframe
     input_data = pd.DataFrame([[
         machine_type, air_temp, process_temp, rpm, torque, tool_wear
     ]], columns=[
@@ -71,13 +81,16 @@ if st.button("Predict"):
         'Tool wear [min]'
     ])
 
+    # Apply scaler to only numeric columns
+    input_data[numeric_cols] = scaler.transform(input_data[numeric_cols])
+
     # Get probability
     probability = model.predict_proba(input_data)[0][1]
 
     # Apply our best threshold from Day 5
     prediction = 1 if probability >= 0.30 else 0
 
-    # ── Show result ──────────────────────────
+    # ── Show result ───────────────────────────
     st.subheader("Prediction Result")
 
     if prediction == 1:
@@ -85,7 +98,7 @@ if st.button("Predict"):
     else:
         st.success(f"✅ NORMAL — Probability of failure: {probability:.2%}")
 
-    # ── SHAP explanation ─────────────────────
+    # ── SHAP explanation ──────────────────────
     st.subheader("What drove this prediction?")
 
     explainer = shap.TreeExplainer(model)
