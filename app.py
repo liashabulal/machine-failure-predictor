@@ -98,29 +98,31 @@ if st.button("Predict"):
     else:
         st.success(f"✅ NORMAL — Probability of failure: {probability:.2%}")
 
-    # ── SHAP explanation ──────────────────────
-  # ── SHAP explanation ──────────────────────
+  
+# ── SHAP explanation ──────────────────────
     st.subheader("What drove this prediction?")
 
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(input_data)
 
-    # Handle both array formats SHAP can return
+    # Get SHAP values for failure class
     if isinstance(shap_values, list):
         sv = shap_values[1][0]
-        base = explainer.expected_value[1]
     else:
         sv = shap_values[0]
-        base = explainer.expected_value
 
-    fig, ax = plt.subplots()
-    shap.waterfall_plot(
-        shap.Explanation(
-            values=sv,
-            base_values=base,
-            data=input_data.iloc[0],
-            feature_names=input_data.columns.tolist()
-        ),
-        show=False
-    )
+    # Build a simple bar chart
+    feature_names = input_data.columns.tolist()
+    shap_df = pd.DataFrame({
+        'Feature': feature_names,
+        'SHAP Value': sv
+    }).sort_values('SHAP Value')
+
+    colors = ['red' if x > 0 else 'blue' for x in shap_df['SHAP Value']]
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.barh(shap_df['Feature'], shap_df['SHAP Value'], color=colors)
+    ax.axvline(x=0, color='black', linewidth=0.8)
+    ax.set_xlabel('SHAP Value (red = pushes toward failure, blue = pushes toward normal)')
+    ax.set_title('Feature Contribution to Prediction')
     st.pyplot(fig)
