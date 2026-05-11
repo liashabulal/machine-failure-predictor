@@ -99,16 +99,25 @@ if st.button("Predict"):
         st.success(f"✅ NORMAL — Probability of failure: {probability:.2%}")
 
     # ── SHAP explanation ──────────────────────
+  # ── SHAP explanation ──────────────────────
     st.subheader("What drove this prediction?")
 
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(input_data)
 
+    # Handle both array formats SHAP can return
+    if isinstance(shap_values, list):
+        sv = shap_values[1][0]
+        base = explainer.expected_value[1]
+    else:
+        sv = shap_values[0]
+        base = explainer.expected_value
+
     fig, ax = plt.subplots()
     shap.waterfall_plot(
         shap.Explanation(
-            values=shap_values[1][0],
-            base_values=explainer.expected_value[1],
+            values=sv,
+            base_values=base,
             data=input_data.iloc[0],
             feature_names=input_data.columns.tolist()
         ),
