@@ -99,30 +99,9 @@ if st.button("Predict"):
         st.success(f"✅ NORMAL — Probability of failure: {probability:.2%}")
 
   
-# ── SHAP explanation ──────────────────────
-    st.subheader("What drove this prediction?")
-
+# ── Debug SHAP ──────────────────────────
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(input_data)
 
-    # Get SHAP values for failure class
-    if isinstance(shap_values, list):
-        sv = shap_values[1][0]
-    else:
-        sv = shap_values[0]
-
-    # Build a simple bar chart
-    feature_names = input_data.columns.tolist()
-    shap_df = pd.DataFrame({
-        'Feature': feature_names,
-        'SHAP Value': sv
-    }).sort_values('SHAP Value')
-
-    colors = ['red' if x > 0 else 'blue' for x in shap_df['SHAP Value']]
-
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.barh(shap_df['Feature'], shap_df['SHAP Value'], color=colors)
-    ax.axvline(x=0, color='black', linewidth=0.8)
-    ax.set_xlabel('SHAP Value (red = pushes toward failure, blue = pushes toward normal)')
-    ax.set_title('Feature Contribution to Prediction')
-    st.pyplot(fig)
+    st.write("shap_values type:", type(shap_values))
+    st.write("shap_values shape:", np.array(shap_values).shape)
