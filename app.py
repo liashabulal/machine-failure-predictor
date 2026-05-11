@@ -99,9 +99,22 @@ if st.button("Predict"):
         st.success(f"✅ NORMAL — Probability of failure: {probability:.2%}")
 
   
-# ── Debug SHAP ──────────────────────────
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(input_data)
+# ── Feature Importance ───────────────────
+    st.subheader("What drives failures in this model?")
 
-    st.write("shape:", np.array(shap_values).shape)
-    st.write("values:", shap_values)
+    feature_names = [
+        'Type', 'Air Temperature', 'Process Temperature',
+        'Rotational Speed', 'Torque', 'Tool Wear'
+    ]
+
+    importances = model.feature_importances_
+    imp_df = pd.DataFrame({
+        'Feature': feature_names,
+        'Importance': importances
+    }).sort_values('Importance')
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.barh(imp_df['Feature'], imp_df['Importance'], color='steelblue')
+    ax.set_xlabel('Importance Score')
+    ax.set_title('Which sensors matter most for predicting failure?')
+    st.pyplot(fig)
