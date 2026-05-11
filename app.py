@@ -103,5 +103,5 @@ if st.button("Predict"):
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(input_data)
 
-    st.write("shap_values type:", type(shap_values))
-    st.write("shap_values shape:", np.array(shap_values).shape)
+    st.write("shape:", np.array(shap_values).shape)
+    st.write("values:", shap_values)
