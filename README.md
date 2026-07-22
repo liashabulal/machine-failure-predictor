@@ -46,6 +46,17 @@ tree-based models generally outperforming deep learning on small tabular dataset
 database (`data/sensor_data.db`), simulating a lightweight production-style 
 ingestion step.
 
+## Dashboard
+
+Interactive dashboard (Tableau Public): https://public.tableau.com/authoring/MachineFailurePredictor-ModelBenchmark/ModelBenchmarkDashboard_#1
+
+Includes threshold sweep comparison across 4 models with calibrated probability 
+outputs, final benchmark comparison across all 6 models, and PCA variance analysis 
+on sensor features.
+
+![Model Benchmark Dashboard](images/Dashboard.png)
+
+
 ## Setup
 
 ```bash
