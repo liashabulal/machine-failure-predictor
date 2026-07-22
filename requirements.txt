@@ -5,3 +5,6 @@ numpy
 shap
 matplotlib
 joblib
+torch
+jupyter
+ipykernel

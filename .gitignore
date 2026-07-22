@@ -1,0 +1,6 @@
+data/*.csv
+data/*.db
+powerbi_data/
+.venv/
+__pycache__/
+*.pyc
